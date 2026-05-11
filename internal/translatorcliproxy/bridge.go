@@ -16,7 +16,7 @@ func ToOpenAI(from sdktranslator.Format, model string, raw []byte, stream bool) 
 
 func FromOpenAINonStream(to sdktranslator.Format, model string, originalReq, translatedReq, raw []byte) []byte {
 	var param any
-	converted := sdktranslator.TranslateNonStream(context.Background(), sdktranslator.FormatOpenAI, to, model, originalReq, translatedReq, raw, &param)
+	converted := []byte(sdktranslator.TranslateNonStream(context.Background(), sdktranslator.FormatOpenAI, to, model, originalReq, translatedReq, raw, &param))
 	usage, ok := extractOpenAIUsageFromJSON(raw)
 	if !ok {
 		return converted
@@ -38,8 +38,9 @@ func FromOpenAIStream(to sdktranslator.Format, model string, originalReq, transl
 		}
 		chunks := sdktranslator.TranslateStream(context.Background(), sdktranslator.FormatOpenAI, to, model, originalReq, translatedReq, payload, &param)
 		for i := range chunks {
-			out.Write(chunks[i])
-			if !bytes.HasSuffix(chunks[i], []byte("\n")) {
+			chunk := []byte(chunks[i])
+			out.Write(chunk)
+			if !bytes.HasSuffix(chunk, []byte("\n")) {
 				out.WriteByte('\n')
 			}
 		}
